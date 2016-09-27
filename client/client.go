@@ -124,8 +124,11 @@ func randomPoint(r *rand.Rand) *pb.Point {
 }
 
 func main() {
+
 	flag.Parse()
+
 	var opts []grpc.DialOption
+
 	if *tls {
 		var sn string
 		if *serverHostOverride != "" {
@@ -145,11 +148,15 @@ func main() {
 	} else {
 		opts = append(opts, grpc.WithInsecure())
 	}
+
+
 	conn, err := grpc.Dial(*serverAddr, opts...)
 	if err != nil {
 		grpclog.Fatalf("fail to dial: %v", err)
 	}
+
 	defer conn.Close()
+
 	client := pb.NewRouteGuideClient(conn)
 
 	// Looking for a valid feature
