@@ -36,6 +36,7 @@ type routeGuideServer struct {
 
 // GetFeature returns the feature at the given point.
 func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feature, error) {
+	fmt.Print("GetFeature method called\n")
 	for _, feature := range s.savedFeatures {
 		if proto.Equal(feature.Location, point) {
 			return feature, nil
@@ -47,6 +48,7 @@ func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb
 
 // ListFeatures lists all features contained within the given bounding Rectangle.
 func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide_ListFeaturesServer) error {
+	fmt.Print("ListFeatures method called\n")
 	for _, feature := range s.savedFeatures {
 		if inRange(feature.Location, rect) {
 			if err := stream.Send(feature); err != nil {
@@ -63,6 +65,7 @@ func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide
 // number of points,  number of known features visited, total distance traveled, and
 // total time spent.
 func (s *routeGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) error {
+	fmt.Print("RecordRoute method called\n")
 	var pointCount, featureCount, distance int32
 	var lastPoint *pb.Point
 	startTime := time.Now()
@@ -96,6 +99,7 @@ func (s *routeGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) e
 // RouteChat receives a stream of message/location pairs, and responds with a stream of all
 // previous messages at each of those locations.
 func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error {
+	fmt.Print("RouteChat method called\n")
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
@@ -120,6 +124,7 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 
 // loadFeatures loads features from a JSON file.
 func (s *routeGuideServer) loadFeatures(filePath string) {
+	fmt.Print("loadFeatures method called\n")
 	file, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		grpclog.Fatalf("Failed to load default features: %v", err)
@@ -188,6 +193,7 @@ func main() {
 	if err != nil {
 		grpclog.Fatalf("failed to listen: %v", err)
 	}
+
 	var opts []grpc.ServerOption
 	if *tls {
 		creds, err := credentials.NewServerTLSFromFile(*certFile, *keyFile)
@@ -196,7 +202,9 @@ func main() {
 		}
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
+
 	grpcServer := grpc.NewServer(opts...)
+	//grpcServer := grpc.NewServer()
 	pb.RegisterRouteGuideServer(grpcServer, newServer())
 	grpcServer.Serve(lis)
 }
